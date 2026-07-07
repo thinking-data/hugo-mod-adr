@@ -1,0 +1,7 @@
+{{ $allADRs := where site.Pages "Type" "adr" }}
+{{ range .Params.adr.links }}
+  {{ $id := . }}
+  {{ range where $allADRs "Params.adr.id" $id }}
+    <a href="{{ .Permalink }}">ADR-{{ $id }}: {{ .Title }}</a>
+  {{ end }}
+{{ end }}

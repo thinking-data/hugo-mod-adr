@@ -1,93 +1,160 @@
-# hugo-mod-adr
+# Architecture and other Decision Records for Hugo
 
+This Hugo module provides a simple way to publish architecture (and other kinds of) decision records (DRs) as web pages with stable, human-accessible permalinks along other documentation of a project.
 
+This makes **Decision Records more accessible for non tec-savvy stakeholders**.
 
-## Getting started
+It can be used for classic Architectural Decision Logs, general Decision Logs supporting different kinds of decision records (such as  requirements, topics, IDTs) as well as for aggregating and managing DRs from different projects.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+This hugo module provides templates and partials (for rendering HTML as well as for consistency rules on the front matter..)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Requirements
 
-## Add your files
+Most important requirement:
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+- Have a stable `human-accessible permalink` to all kinds of decisions.
 
+Other functional requirements:
+
+- The implementation approach should feel “Hugo native”
+- Work as an extension to any Hugo theme (no theme lock-in)
+- Keep content close to source (Markdown files), readable, and easy to reference
+- Support single-project sites with a simple Decision Log
+- Support a single site aggregating many groups/projects for broader Architectural Knowledge Management 
+- Decisions are can categorized e.g. as adr, requirement, topic, idt... (decision-types).
+- Each decision has a status (e.g. decided, proposed, superseded, deprecated).
+- Provide overview pages for:
+  - All decisions of a group across projects
+  - All decisions of a project
+  - Decisions filtered by status
+
+What we want from published `dr`s:
+
+- Permalink of the form `dr/{group}/{project}/{adr|requirement|topic|theme}/make-decision`
+- With a simple form `dr/make-decision` for single project with classic Decision Log
+
+## A Decision Record (ADR)
+
+All kinds of decisions records should have the following data items:
+
+```text
+name/title
+status such as proposed, accepted, rejected, deprecated, superseded, etc. OR  pending, decided, or approved.
+style: 
+Related decisions:
+Related requirements: 
+Deciders: [list everyone involved in the decision]
+Date: [YYYY-MM-DD when the decision was last updated] 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/renzok/hugo-mod-adr.git
-git branch -M main
-git push -uf origin main
+
+### As Markdown with Front Matter
+
+- Applies to any system with Front Matter support (hugo, Jekyll...) 
+- Is anyway nice to separate out full structured data from unstructured human text
+
+Example:
+
+```yaml
+---
+title: "Use Architecture Decision Records"
+date: 2024-02-02T04:14:54-08:00 #creation date
+description: "adr of..."  # the description is typically rendered within a meta element within the head element of the published HTML file
+draft: false # Whether to disable rendering unless you pass the --buildDrafts flag to the hugo command
+keywords: ["java"] # An array of keywords, typically rendered within a meta element within the head element of the published HTML file, or used as a taxonomy to classify content 
+lastmod: 2024-02-02T04:14:54-08:00
+publishDate: 2024-02-02 #The page publication date. Before the publication date, the page will not be rendered unless you pass the --buildFuture flag to the hugo command.
+summary: "the summary either summarizes the content or serves as a teaser to encourage readers to visit the page"
+params:
+  dr: # generell decision record
+    type: {adr, req, top}
+    # will be used as page content title, if not present page.title will be used 
+    name: "Use Architecture Decision Records"
+    # mandatory: id without any leading zeros  
+    status: "decided"
+    related-decisions: 'main:adr/use-postgresql'
+---
 ```
 
-## Integrate with your tools
+## Decision Log (ADL)
 
-* [Set up project integrations](https://gitlab.com/renzok/hugo-mod-adr/-/settings/integrations)
+The normal way of git based ADRs is having folder with ADRs <https://github.com/architecture-decision-record/architecture-decision-record/tree/main#how-to-start-using-adrs-with-git> in the project repository. Usually: `docs/adr`.
 
-## Collaborate with your team
+### Suggested markdown file name convention
 
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+- The name has a present tense imperative verb phrase. This helps readability and matches our commit message format.
 
-## Test and Deploy
+- The name uses lowercase and dashes (same as this repo). This is a balance of readability and system usability.
 
-Use the built-in continuous integration in GitLab.
+examples:
 
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
+- choose-database.md
+- format-timestamps.md
+- manage-passwords.md
+- handle-exceptions.md
 
-***
+### Within a Hugo site
 
-# Editing this README
+As simple as having the Decision Record folder within the Hugo `content` folder. Suggested: `content/dr` 
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+Then add an additional `_index.md` to render an overview with a list of `DR`s.
 
-## Suggestions for a good README
+```shell
+content/
+└── dr/
+    ├── _index.md                         (lists all decisions)
+    └── use-decision-records.md
+```
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Hugo path and DRs as RESTful resources
 
-## Name
-Choose a self-explaining name for your project.
+Given above directory structure hugo generates a logical tree with logical paths <https://gohugo.io/methods/page/path/#logical-tree>
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+This is the basis for navigating and referencing DRs within hugo.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+Additionally, the logical path of some `DR` is the hugo internal and unique name of the `DR` and the basis for the `human-accessible permalink` which fulfils all criteria of a `resource` in terms of RESTFul API design.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+With `relative permalink` the host-relative URL of a published resource or a rendered page.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+### Aggregating DRs from different projects
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+In order to have a common pre- path segment for collecting all decisions we choose: `dr` for decision records (of any kind).
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+In order to keep public and content as close as possible together, the content should look like
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```shell
+content/
+└── dr/
+    ├── _index.md                         (lists all organizations/groups)
+    ├── org-1/
+    │   ├── _index.md                     (lists all projects of group)
+    │   ├── project-1/
+    │   │   ├── _index.md                 (lists all decisions by type)
+    │   │   ├── requirement/
+    │   │   │   ├── _index.md
+    │   │   │   └── document-req-page.md  (page)
+    │   │   ├── adr/                      (architecture decisions)
+    │   │   └── topic/                    (topics, any other topic with a conclusion)
+    │   └── project-2/                    (same as for project-1)
+    ├── org-2/
+    └── etc..
+```
+
+## Towards Architecture Knowledge Management (AKM)
+
+### Consistency Rules
+
+### Editing support
+
+- todo e.g. sveltia
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+All kinds of contribution are welcome :)
 
 ## Authors and acknowledgment
+
 Show your appreciation to those who have contributed to the project.
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Apache2

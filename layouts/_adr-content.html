@@ -1,0 +1,46 @@
+<div class="td-content">
+  <h1>{{ or .Params.adr.name .Title }}</h1>
+  {{ if .Description }}<div class="lead">{{ markdownify .Description }}</div>{{ end }}
+
+<h1>from module adr</h1>
+  
+
+  <div class="adr-meta mb-4">
+    <table class="table table-sm table-borderless w-auto">
+      <tbody>
+        {{ with .Params.adr.id }}
+        <tr>
+          <th scope="row">ID</th>
+          <td>{{ . }}</td>
+        </tr>
+        {{ end }}
+        {{ with .Date }}
+        <tr>
+          <th scope="row">Date</th>
+          <td>{{ . | time.Format "2006-01-02" }}</td>
+        </tr>
+        {{ end }}
+        {{ with .Params.adr.status }}
+        <tr>
+          <th scope="row">Status</th>
+          <td>
+            {{ $statusClass := dict "proposed" "text-bg-primary" "accepted" "text-bg-success" "deprecated" "text-bg-secondary" "superseded" "text-bg-warning" }}
+            <span class="badge {{ index $statusClass . | default "text-bg-secondary" }}">{{ . | title }}</span>
+          </td>
+        </tr>
+        {{ end }}
+        {{ if .Params.adr.links }}<tr><th scope="row">Related</th><td>{{ partial "adr-links.html" . }}</td></tr>{{ end }}
+      </tbody>
+    </table>
+  </div>
+
+  <header class="article-meta">
+    {{ partial "taxonomy_terms_article_wrapper.html" . -}}
+    {{ if (and (not .Params.hide_readingtime) (.Site.Params.ui.readingtime.enable)) -}}
+      {{ partial "reading-time.html" . -}}
+    {{ end -}}
+  </header>
+  {{ .Content }}
+  {{ partial "feedback.html" . -}}
+  {{ partial "page-meta-lastmod.html" . }}
+</div>
