@@ -47,10 +47,33 @@ Deciders: [list everyone involved in the decision]
 Date: [YYYY-MM-DD when the decision was last updated] 
 ```
 
+### Decision types
+
+Many aspects of standard- and software development can be expressed as decisions.
+
+Hence several types of decisions are supported
+
+`{adr|requirement|topic|theme|idt}`
+
+- adr: Architecture Decision Record
+- requirement: A classical software engineering requirement. It is a decision which requirements to consider. Can also be seen as ASR: architecturally-significant requirement
+- topic:
+- theme: More of guiding principles for making decisions.
+- idt: Important Technical decision. many decisions that are critical in practice are technical but not strictly architectural see https://ignaciolarranaga.medium.com/itds-a-lean-adr-for-executive-technical-decision-making-at-scale-e18bb3f6a563. Main feature the decision is in the title
+
 ### As Markdown with Front Matter
 
 - Applies to any system with Front Matter support (hugo, Jekyll...) 
 - Is anyway nice to separate out full structured data from unstructured human text
+
+Rules of thumb:
+
+- Use the front matter variable of your content system and map the Dr data accordingly
+- consider usability in other systems like your IDEs and coding platforms like Git{Lab,Hub}. However, be aware that your decision records most likely will not leave your system. hence portablity is of minor concern.
+
+Below example is for Hugo static site generator.
+
+The common dr specific part is in `params`. 
 
 Example:
 
@@ -74,6 +97,12 @@ params:
     related-decisions: 'main:adr/use-postgresql'
 ---
 ```
+
+In detail:
+
+title: is the page display title which might have rules common to the website and being determined by an external editor. In order to have a stable decision name we use `params.dr.name`
+
+
 
 ## Decision Log (ADL)
 
