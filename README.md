@@ -20,8 +20,8 @@ Other functional requirements:
 - Work as an extension to any Hugo theme (no theme lock-in)
 - Keep content close to source (Markdown files), readable, and easy to reference
 - Support single-project sites with a simple Decision Log
-- Support a single site aggregating many groups/projects for broader Architectural Knowledge Management 
-- Decisions are can categorized e.g. as adr, requirement, topic, idt... (decision-types).
+- Support a single site aggregating many groups/projects for broader Architectural Knowledge Management
+- Decisions are categorized e.g. as adr, requirement, topic, idt... (decision-types).
 - Each decision has a status (e.g. decided, proposed, superseded, deprecated).
 - Provide overview pages for:
   - All decisions of a group across projects
@@ -57,9 +57,9 @@ Hence several types of decisions are supported
 
 - adr: Architecture Decision Record
 - requirement: A classical software engineering requirement. It is a decision which requirements to consider. Can also be seen as ASR: architecturally-significant requirement
-- topic:
+- topic: 
 - theme: More of guiding principles for making decisions.
-- idt: Important Technical decision. many decisions that are critical in practice are technical but not strictly architectural see https://ignaciolarranaga.medium.com/itds-a-lean-adr-for-executive-technical-decision-making-at-scale-e18bb3f6a563. Main feature the decision is in the title
+- idt: Important Technical Decision. Many decisions that are critical in practice are technical but not strictly architectural see https://ignaciolarranaga.medium.com/itds-a-lean-adr-for-executive-technical-decision-making-at-scale-e18bb3f6a563. Main feature: the decision is in the title
 
 ### As Markdown with Front Matter
 
@@ -68,12 +68,12 @@ Hence several types of decisions are supported
 
 Rules of thumb:
 
-- Use the front matter variable of your content system and map the Dr data accordingly
-- consider usability in other systems like your IDEs and coding platforms like Git{Lab,Hub}. However, be aware that your decision records most likely will not leave your system. hence portablity is of minor concern.
+- Use the front matter variable of your content system and map the Decision Record data accordingly
+- consider usability in other systems like your IDEs and coding platforms like Git{Lab,Hub}. However, be aware that your decision records most likely will not leave your system. Hence portability is of minor concern.
 
 Below example is for Hugo static site generator.
 
-The common dr specific part is in `params`. 
+The common `dr` specific part is in `params`. 
 
 Example:
 
@@ -89,12 +89,13 @@ publishDate: 2024-02-02 #The page publication date. Before the publication date,
 summary: "the summary either summarizes the content or serves as a teaser to encourage readers to visit the page"
 params:
   dr: # generell decision record
-    type: {adr, req, top}
+    type: adr
     # will be used as page content title, if not present page.title will be used 
     name: "Use Architecture Decision Records"
     # mandatory: id without any leading zeros  
     status: "decided"
-    related-decisions: 'main:adr/use-postgresql'
+    related-decisions: 'dr:/adr/use-postgresql'
+    related-requirements: 'dr:/requirement/use-postgresql'
 ---
 ```
 
@@ -102,11 +103,11 @@ In detail:
 
 title: is the page display title which might have rules common to the website and being determined by an external editor. In order to have a stable decision name we use `params.dr.name`
 
-
-
 ## Decision Log (ADL)
 
 The normal way of git based ADRs is having folder with ADRs <https://github.com/architecture-decision-record/architecture-decision-record/tree/main#how-to-start-using-adrs-with-git> in the project repository. Usually: `docs/adr`.
+
+In hugo it might be `content/dr`
 
 ### Suggested markdown file name convention
 
@@ -123,7 +124,7 @@ examples:
 
 ### Within a Hugo site
 
-As simple as having the Decision Record folder within the Hugo `content` folder. Suggested: `content/dr` 
+As simple as having the Decision Record folder within the Hugo `content` folder. Suggested: `content/dr`
 
 Then add an additional `_index.md` to render an overview with a list of `DR`s.
 
@@ -144,11 +145,11 @@ Additionally, the logical path of some `DR` is the hugo internal and unique name
 
 With `relative permalink` the host-relative URL of a published resource or a rendered page.
 
-### Aggregating DRs from different projects
+### Maintaining all DRs from different projects in a single Hugo project
 
 In order to have a common pre- path segment for collecting all decisions we choose: `dr` for decision records (of any kind).
 
-In order to keep public and content as close as possible together, the content should look like
+In order to keep public and content as close as possible together, the content folder should have the following structure:
 
 ```shell
 content/
@@ -168,7 +169,49 @@ content/
     └── etc..
 ```
 
+If all different projects maintain all DRs within a single Hugo project, the link structure is simply reflecting the directory structure:
+
+```bash 
+`dr/{group}/{project}/{adr|requirement|topic|theme|...}/
+```
+
+Linking and relating each DR is always consistent.
+
 ## Towards Architecture Knowledge Management (AKM)
+
+Aggregating DRs from different projects is a first step in AKM.
+
+A more advanced setup would allow each group and project an own Hugo site for its own documentation purpose.
+
+Suggestion: Each project follows the above directory structure.
+
+### Aggregating from different project via e.g. a build system 
+
+The way depends on the build system. However, this approach might allow deviations from the common directory structure.
+
+### Importing DRs using Hugo modules
+
+Here the best way is to have a common directory structure in all projects.
+
+### Keep Links between DR consistent across projects
+
+A challenge is to allow an easy way of linking DRs in Markdown text as well as in front-matter params such as `related-decisions`.
+
+To achieve this allow for a specific "pseudo" protocol in an URI:
+
+Pseudo Links within a project:
+
+dr:/
+
+Pseudo Links within to another project:
+
+dr:/{group}/{project}/adr/make-us-of
+
+e.g.
+
+dr:/another-group/another-project/adr/make-us-of
+
+...
 
 ### Consistency Rules
 
